@@ -5,11 +5,14 @@ import pandas
 BACKGROUND_COLOR = "#B1DDC6"
 random_word = {}
 
+data = pandas.read_csv("data/french_words.csv")
+new_dict = data.to_dict(orient="records")
+
 
 def next_word():
     global random_word, timer
     window.after_cancel(timer)
-    random_word = new_dict[random.randint(0, len(new_dict) - 1)]
+    random_word = random.choice(new_dict)
     canvas.itemconfig(word_title, text="French", fill="black")
     canvas.itemconfig(word_to_learn, text=random_word["French"], fill="black")
     canvas.itemconfig(card_background, image=front_card)
@@ -22,13 +25,17 @@ def card_flip():
     canvas.itemconfig(card_background, image=back_card)
 
 
+def is_known():
+    new_dict.remove(random_word)
+    print(len(new_dict))
+    data = pandas.DataFrame(new_dict)
+    data.to_csv("Words.csv")
+
+
 window = Tk()
 window.title("Language Flashcards")
 window.config(padx=50, pady=50, bg=BACKGROUND_COLOR)
 timer = window.after(3000, func=card_flip)
-
-data = pandas.read_csv("data/french_words.csv")
-new_dict = data.to_dict(orient="records")
 
 canvas = Canvas(width=800, height=526)
 front_card = PhotoImage(file="images/card_front.png")
@@ -45,7 +52,7 @@ unknown_button = Button(image=cross_image, highlightthickness=0, command=next_wo
 unknown_button.grid(row=1, column=0)
 
 right_image = PhotoImage(file="images/right.png")
-right_button = Button(image=right_image, highlightthickness=0, command=next_word)
+right_button = Button(image=right_image, highlightthickness=0, command=is_known)
 right_button.grid(row=1, column=1)
 
 next_word()
